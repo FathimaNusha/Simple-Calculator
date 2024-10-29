@@ -98,6 +98,12 @@
       "languageVersion": "2.17"
     },
     {
+      "name": "math_expressions",
+      "rootUri": "file:///C:/Users/Abin/AppData/Local/Pub/Cache/hosted/pub.dev/math_expressions-2.6.0",
+      "packageUri": "lib/",
+      "languageVersion": "3.1"
+    },
+    {
       "name": "meta",
       "rootUri": "file:///C:/Users/Abin/AppData/Local/Pub/Cache/hosted/pub.dev/meta-1.15.0",
       "packageUri": "lib/",
@@ -170,7 +176,7 @@
       "languageVersion": "3.5"
     }
   ],
-  "generated": "2024-10-26T06:38:00.894855Z",
+  "generated": "2024-10-29T14:17:38.444680Z",
   "generator": "pub",
   "generatorVersion": "3.5.3",
   "flutterRoot": "file:///C:/Users/Abin/Documents/FlutterDev/flutter",

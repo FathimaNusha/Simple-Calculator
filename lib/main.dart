@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:math_expressions/math_expressions.dart';
 
 void main() => runApp(MyApp());
 
@@ -19,11 +20,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String text = ""; // Text to display
-  String result = ""; // Result of calculation
   List<String> expression = []; // Store the expression
 
   @override
   Widget build(BuildContext context) {
+    double h = MediaQuery.of(context).size.height;
+    double w = MediaQuery.of(context).size.width;
+
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Calculator', style: TextStyle(fontSize: 28)),
@@ -33,138 +37,105 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           children: <Widget>[
             Container(
-              padding: EdgeInsets.only(left: 0, top: 10),
-              alignment: Alignment.bottomRight,
-              height: 180,
+              padding: EdgeInsets.only(left: 0, top: h * 0.03),
+              alignment: Alignment.topRight,
+              height: h * 0.20,
               child: Text(
                 text,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 60,
+                  fontSize: 55,
                   color: Colors.black54,
                 ),
               ),
             ),
+            SizedBox(height: h * 0.1),
+
             // Delete button row
             Padding(
-              padding: EdgeInsets.only(top: 90, left: 16.0, right: 16.0),
+              padding: EdgeInsets.symmetric(horizontal: 16),
               child: Row(
-                children: <Widget>[
-                  OutlinedButton(
-                    onPressed: () => btnClicked("<"),
-                    style: OutlinedButton.styleFrom(
-                      padding: EdgeInsets.all(24),
-                      backgroundColor: Colors.black38,
-                      foregroundColor: Colors.white,
+                children: <Widget> [OutlinedButton(
+                      onPressed: () => btnClicked("<"),
+                      style: OutlinedButton.styleFrom(
+                        padding: EdgeInsets.all(24),
+                        backgroundColor: Colors.black38,
+                        foregroundColor: Colors.white,
+                      ),
+                      child: Icon(
+                        Icons.backspace_outlined,
+                        size: 28,
+                      ),
                     ),
-                    child: Icon(
-                      Icons.backspace_outlined,
-                      size: 28,
-                    ),
-                  ),
+
                 ],
               ),
             ),
-            SizedBox(height: 10),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: <Widget>[
-                  customOutlinedButton("9"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("8"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("7"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("+"),
-                ],
-              ),
-            ),
-            SizedBox(height: 10),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: <Widget>[
-                  customOutlinedButton("6"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("5"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("4"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("-"),
-                ],
-              ),
-            ),
-            SizedBox(height: 10),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: <Widget>[
-                  customOutlinedButton("3"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("2"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("1"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("*"),
-                ],
-              ),
-            ),
-            SizedBox(height: 10),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.0),
-              child: Row(
-                children: <Widget>[
-                  customOutlinedButton("C"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("0"),
-                  SizedBox(width: 10),
-                  customOutlinedButton("="),
-                  SizedBox(width: 10),
-                  customOutlinedButton("/"),
-                ],
-              ),
-            ),
-            SizedBox(height: 20),
+            SizedBox(height: h * 0.02),
+            buttonRow(["9", "8", "7", "+"]),
+            SizedBox(height: h * 0.02),
+            buttonRow(["6", "5", "4", "-"]),
+            SizedBox(height: h * 0.02),
+            buttonRow(["3", "2", "1", "*"]),
+            SizedBox(height: h * 0.02),
+            buttonRow(["C", "0", "=", "/"]),
           ],
         ),
       ),
     );
   }
 
-  Widget customOutlinedButton(String val) {
-    return Expanded(
-      child: OutlinedButton(
-        onPressed: () => btnClicked(val),
-        style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.all(24),
-          backgroundColor: Colors.black38,
-          foregroundColor: Colors.white,
-        ),
-        child: Text(
-          val,
-          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-        ),
+  Widget buttonRow(List<String> buttons) {
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: buttons.map((btnText) {
+          return Expanded(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 5.0), // Horizontal space between buttons
+              child: OutlinedButton(
+                onPressed: () => btnClicked(btnText),
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.all(20),
+                  backgroundColor: Colors.black38,
+                  foregroundColor: Colors.white,
+                ),
+                child: Text(
+                  btnText,
+                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+          );
+        }).toList(),
       ),
     );
   }
 
   void btnClicked(String btnText) {
+    if (text.length >= 24 && btnText != "C" && btnText != "<" && btnText != "=") {
+      // Show popup message when the maximum length is reached
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Can only enter up to 24 digits."),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return; // Prevent further input if 24 characters reached
+    }
+
     if ((btnText == "+" || btnText == "-" || btnText == "*" || btnText == "/") && text.isEmpty) {
-      setState(() {
-        text = "Invalid input";
-      });
-      Future.delayed(Duration(milliseconds: 300), () {
-        setState(() {
-          text = "";
-        });
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Invalid Input."),
+          duration: Duration(seconds: 2),
+        ),
+      );
       return;
     }
 
     if (btnText == "C") {
       text = "";
-      result = "";
       expression.clear();
       setState(() {
         text = "";
@@ -172,24 +143,12 @@ class _HomePageState extends State<HomePage> {
     } else if (btnText == "<") {
       if (text.isNotEmpty) {
         setState(() {
-          text = text.substring(0, text.length - 1);
+          text = text.substring(0, text.length - 1); // Remove last character
           if (expression.isNotEmpty) {
-            expression.removeLast();
+            expression.removeLast(); // Remove last entry from expression
           }
         });
       }
-    } else if (btnText == "+" || btnText == "-" || btnText == "*" || btnText == "/") {
-      if (expression.isNotEmpty && isOperator(expression.last)) {
-        expression.removeLast();
-        text = text.substring(0, text.length - 1);
-      }
-      expression.add(btnText);
-      setState(() {
-        text += btnText;
-        if (text.length > 24) {
-          text = text.substring(0, 24);
-        }
-      });
     } else if (btnText == "=") {
       calculateResult();
     } else {
@@ -200,18 +159,17 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  bool isOperator(String char) {
-    return char == "+" || char == "-" || char == "*" || char == "/";
-  }
-
   void calculateResult() {
     try {
       String expressionStr = expression.join();
-      result = evaluateExpression(expressionStr).toString();
+      Parser parser = Parser();
+      Expression exp = parser.parse(expressionStr);
+      ContextModel cm = ContextModel();
+      double eval = exp.evaluate(EvaluationType.REAL, cm);
 
       setState(() {
-        text = result;
-        expression = [result];
+        text = eval.toStringAsPrecision(15); // Limit the precision for display
+        expression = [text];
       });
     } catch (e) {
       setState(() {
@@ -224,59 +182,5 @@ class _HomePageState extends State<HomePage> {
       });
       expression.clear();
     }
-  }
-
-  double evaluateExpression(String expression) {
-    List<String> tokens = expression.split(RegExp(r'(?<=[-+*/])|(?=[-+*/])'));
-    List<double> values = [];
-    List<String> ops = [];
-
-    for (String token in tokens) {
-      if (double.tryParse(token) != null) {
-        values.add(double.parse(token));
-      } else if (isOperator(token)) {
-        while (ops.isNotEmpty && precedence(ops.last) >= precedence(token)) {
-          double b = values.removeLast();
-          double a = values.removeLast();
-          values.add(applyOp(ops.removeLast(), a, b));
-        }
-        ops.add(token);
-      }
-    }
-
-    while (ops.isNotEmpty) {
-      double b = values.removeLast();
-      double a = values.removeLast();
-      values.add(applyOp(ops.removeLast(), a, b));
-    }
-
-    return values.last;
-  }
-
-  int precedence(String op) {
-    switch (op) {
-      case "+":
-      case "-":
-        return 1;
-      case "*":
-      case "/":
-        return 2;
-      default:
-        return 0;
-    }
-  }
-
-  double applyOp(String op, double a, double b) {
-    switch (op) {
-      case "+":
-        return a + b;
-      case "-":
-        return a - b;
-      case "*":
-        return a * b;
-      case "/":
-        return a / b;
-    }
-    return 0;
   }
 }
