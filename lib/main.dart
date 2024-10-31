@@ -1,14 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:math_expressions/math_expressions.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      home: HomePage(),
+    return ScreenUtilInit(
+      designSize: const Size(360, 690), // Replace with your design screen size
+      builder: (_, child) {
+        return MaterialApp(
+          home: HomePage(),
+          debugShowCheckedModeBanner: false,
+        );
+      },
     );
   }
 }
@@ -21,88 +29,113 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String text = ""; // Text to display
   List<String> expression = []; // Store the expression
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: text);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     double h = MediaQuery.of(context).size.height;
     double w = MediaQuery.of(context).size.width;
 
-
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calculator', style: TextStyle(fontSize: 28)),
+        title: Text('Calculator', style: TextStyle(fontSize: 28.sp)),
       ),
-      body: Container(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: <Widget>[
-            Container(
-              padding: EdgeInsets.only(left: 0, top: h * 0.03),
-              alignment: Alignment.topRight,
-              height: h * 0.20,
-              child: Text(
-                text,
+      body: Column(
+        children: [
+          // Display area (1 part)
+          Expanded(
+            flex: 1,
+            child: Container(
+              padding: EdgeInsets.only(left: w * 0.04, right: w * 0.04),
+              alignment: Alignment.bottomRight,
+              child: TextField(
+                controller: _controller,
+                showCursor: false,
+                readOnly: true, // Makes it uneditable by typing
+                textAlign: TextAlign.right,
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
-                  fontSize: 55,
+                  fontSize: 55.sp,
                   color: Colors.black54,
                 ),
+                decoration: InputDecoration(border: InputBorder.none),
               ),
             ),
-            SizedBox(height: h * 0.1),
+          ),
 
-            // Delete button row
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Row(
-                children: <Widget> [OutlinedButton(
-                      onPressed: () => btnClicked("<"),
-                      style: OutlinedButton.styleFrom(
-                        padding: EdgeInsets.all(24),
-                        backgroundColor: Colors.black38,
-                        foregroundColor: Colors.white,
-                      ),
-                      child: Icon(
-                        Icons.backspace_outlined,
-                        size: 28,
-                      ),
+          // Button area (3 parts)
+          Expanded(
+            flex: 2,
+            child: Container(
+              padding: EdgeInsets.only(left: w * 0.04, right: w * 0.04),
+              child: Column(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: w * 0.02),
+                    child: Row(
+                      children: <Widget>[
+                        OutlinedButton(
+                          onPressed: () => btnClicked("<"),
+                          style: OutlinedButton.styleFrom(
+                            padding: EdgeInsets.all(w * 0.06),
+                            backgroundColor: Colors.black38,
+                            foregroundColor: Colors.white,
+                          ),
+                          child: Icon(
+                            Icons.backspace_outlined,
+                            size: 28.sp,
+                          ),
+                        ),
+                      ],
                     ),
-
+                  ),
+                  SizedBox(height: h * 0.02),
+                  buttonRow(["9", "8", "7", "+"], w),
+                  SizedBox(height: h * 0.02),
+                  buttonRow(["6", "5", "4", "-"], w),
+                  SizedBox(height: h * 0.02),
+                  buttonRow(["3", "2", "1", "*"], w),
+                  SizedBox(height: h * 0.02),
+                  buttonRow(["C", "0", "=", "/"], w),
                 ],
               ),
             ),
-            SizedBox(height: h * 0.02),
-            buttonRow(["9", "8", "7", "+"]),
-            SizedBox(height: h * 0.02),
-            buttonRow(["6", "5", "4", "-"]),
-            SizedBox(height: h * 0.02),
-            buttonRow(["3", "2", "1", "*"]),
-            SizedBox(height: h * 0.02),
-            buttonRow(["C", "0", "=", "/"]),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget buttonRow(List<String> buttons) {
+  Widget buttonRow(List<String> buttons, double w) {
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 16),
+      padding: EdgeInsets.only(left: w * 0.001),
       child: Row(
         children: buttons.map((btnText) {
           return Expanded(
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 5.0), // Horizontal space between buttons
+              padding: EdgeInsets.only(left: w * 0.022),
               child: OutlinedButton(
                 onPressed: () => btnClicked(btnText),
                 style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.all(20),
+                  padding: EdgeInsets.all(w * 0.05),
                   backgroundColor: Colors.black38,
                   foregroundColor: Colors.white,
                 ),
                 child: Text(
                   btnText,
-                  style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -113,48 +146,52 @@ class _HomePageState extends State<HomePage> {
   }
 
   void btnClicked(String btnText) {
-    if (text.length >= 24 && btnText != "C" && btnText != "<" && btnText != "=") {
-      // Show popup message when the maximum length is reached
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Can only enter up to 24 digits."),
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return; // Prevent further input if 24 characters reached
-    }
+    // Check if the input is an operator
+    bool isOperator = btnText == "+" || btnText == "-" || btnText == "*" || btnText == "/";
 
-    if ((btnText == "+" || btnText == "-" || btnText == "*" || btnText == "/") && text.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Invalid Input."),
-          duration: Duration(seconds: 2),
-        ),
-      );
+    // If the button is an operator and the current text is empty, show an error
+    if (isOperator && text.isEmpty) {
       return;
     }
 
+    // If the button is "C", clear the text and expression
     if (btnText == "C") {
       text = "";
       expression.clear();
       setState(() {
-        text = "";
+        _controller.text = text;
       });
-    } else if (btnText == "<") {
+    }
+    // If the button is "<", remove the last character
+    else if (btnText == "<") {
       if (text.isNotEmpty) {
         setState(() {
           text = text.substring(0, text.length - 1); // Remove last character
+          _controller.text = text;
           if (expression.isNotEmpty) {
             expression.removeLast(); // Remove last entry from expression
           }
         });
       }
-    } else if (btnText == "=") {
+    }
+    // If the button is "=", calculate the result
+    else if (btnText == "=") {
       calculateResult();
-    } else {
-      expression.add(btnText);
+    }
+    // For other buttons (numbers or operators)
+    else {
+      // If the last character is an operator, replace it with the new operator
+      if (isOperator && text.isNotEmpty && (text.endsWith("+") || text.endsWith("-") || text.endsWith("*") || text.endsWith("/"))) {
+        text = text.substring(0, text.length - 1) + btnText; // Replace last operator
+        expression[expression.length - 1] = btnText; // Update the expression
+      }
+      // If the last character is not an operator, add the new button text to the expression
+      else {
+        expression.add(btnText);
+        text += btnText; // Append button text to the displayed text
+      }
       setState(() {
-        text += btnText;
+        _controller.text = text; // Update the displayed text in the TextField
       });
     }
   }
@@ -168,16 +205,23 @@ class _HomePageState extends State<HomePage> {
       double eval = exp.evaluate(EvaluationType.REAL, cm);
 
       setState(() {
-        text = eval.toStringAsPrecision(15); // Limit the precision for display
+        // Convert to string, then remove unnecessary trailing zeros and the decimal point if not needed
+        text = eval.toStringAsFixed(15).replaceAll(RegExp(r'([.]*0+)(?!.*\d)'), '');
+        if (text.endsWith('.')) {
+          text = text.substring(0, text.length - 1); // Remove the decimal point if it's at the end
+        }
+        _controller.text = text;
         expression = [text];
       });
     } catch (e) {
       setState(() {
         text = "Error";
+        _controller.text = text;
       });
       Future.delayed(Duration(milliseconds: 300), () {
         setState(() {
           text = "";
+          _controller.text = text;
         });
       });
       expression.clear();

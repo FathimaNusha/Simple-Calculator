@@ -4,25 +4,6 @@
             "outputFile": "com.example.calculater.app-mergeDebugResources-24:/values/values.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\Abin\\Desktop\\calculater\\android\\app\\src\\main\\res\\values\\styles.xml",
-                    "from": {
-                        "startLines": "3,14",
-                        "startColumns": "4,4",
-                        "startOffsets": "176,832",
-                        "endLines": "7,16",
-                        "endColumns": "12,12",
-                        "endOffsets": "483,998"
-                    },
-                    "to": {
-                        "startLines": "155,159",
-                        "startColumns": "4,4",
-                        "startOffsets": "7894,8075",
-                        "endLines": "158,161",
-                        "endColumns": "12,12",
-                        "endOffsets": "8070,8239"
-                    }
-                },
-                {
                     "source": "C:\\Users\\Abin\\.gradle\\caches\\transforms-3\\3e4063b07db37bd08626b21245b0f82d\\transformed\\jetified-activity-1.8.1\\res\\values\\values.xml",
                     "from": {
                         "startLines": "2,3",
@@ -145,6 +126,25 @@
                         "endLines": "119,123,144,260,264",
                         "endColumns": "56,64,63,24,24",
                         "endOffsets": "5847,6024,7154,12575,12724"
+                    }
+                },
+                {
+                    "source": "C:\\Users\\Abin\\Desktop\\Calculator\\android\\app\\src\\main\\res\\values\\styles.xml",
+                    "from": {
+                        "startLines": "3,14",
+                        "startColumns": "4,4",
+                        "startOffsets": "176,832",
+                        "endLines": "7,16",
+                        "endColumns": "12,12",
+                        "endOffsets": "483,998"
+                    },
+                    "to": {
+                        "startLines": "155,159",
+                        "startColumns": "4,4",
+                        "startOffsets": "7894,8075",
+                        "endLines": "158,161",
+                        "endColumns": "12,12",
+                        "endOffsets": "8070,8239"
                     }
                 },
                 {
