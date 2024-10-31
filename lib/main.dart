@@ -50,7 +50,7 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calculator', style: TextStyle(fontSize: 28.sp)),
+        title: Text('Calculator', style: TextStyle(fontSize: 28.sp, color: Colors.black)),
       ),
       body: Column(
         children: [
@@ -66,9 +66,8 @@ class _HomePageState extends State<HomePage> {
                 readOnly: true, // Makes it uneditable by typing
                 textAlign: TextAlign.right,
                 style: TextStyle(
-                  fontWeight: FontWeight.bold,
                   fontSize: 55.sp,
-                  color: Colors.black54,
+                  color: Colors.black,
                 ),
                 decoration: InputDecoration(border: InputBorder.none),
               ),
@@ -102,11 +101,11 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                   SizedBox(height: h * 0.02),
-                  buttonRow(["9", "8", "7", "+"], w),
+                  buttonRow(["7", "8", "9", "+"], w),
                   SizedBox(height: h * 0.02),
-                  buttonRow(["6", "5", "4", "-"], w),
+                  buttonRow(["4", "5", "6", "-"], w),
                   SizedBox(height: h * 0.02),
-                  buttonRow(["3", "2", "1", "*"], w),
+                  buttonRow(["1", "2", "3", "*"], w),
                   SizedBox(height: h * 0.02),
                   buttonRow(["C", "0", "=", "/"], w),
                 ],
@@ -205,10 +204,27 @@ class _HomePageState extends State<HomePage> {
       double eval = exp.evaluate(EvaluationType.REAL, cm);
 
       setState(() {
-        // Convert to string, then remove unnecessary trailing zeros and the decimal point if not needed
-        text = eval.toStringAsFixed(15).replaceAll(RegExp(r'([.]*0+)(?!.*\d)'), '');
-        if (text.endsWith('.')) {
-          text = text.substring(0, text.length - 1); // Remove the decimal point if it's at the end
+        // Check if the result is infinite
+        if (eval.isInfinite) {
+          setState(() {
+            text = "Error";
+            _controller.text = text;
+          });
+          Future.delayed(Duration(milliseconds: 200), () {
+            setState(() {
+              text = "";
+              _controller.text = text;
+            });
+          });
+          // Display "Error" for infinite values
+        }else {
+          // Convert to string, then remove unnecessary trailing zeros and the decimal point if not needed
+          text = eval.toStringAsFixed(15).replaceAll(
+              RegExp(r'([.]*0+)(?!.*\d)'), '');
+          if (text.endsWith('.')) {
+            text = text.substring(0,
+                text.length - 1); // Remove the decimal point if it's at the end
+          }
         }
         _controller.text = text;
         expression = [text];
@@ -218,7 +234,7 @@ class _HomePageState extends State<HomePage> {
         text = "Error";
         _controller.text = text;
       });
-      Future.delayed(Duration(milliseconds: 300), () {
+      Future.delayed(Duration(milliseconds: 200), () {
         setState(() {
           text = "";
           _controller.text = text;
