@@ -45,12 +45,19 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    double h = MediaQuery.of(context).size.height;
-    double w = MediaQuery.of(context).size.width;
+    double h = MediaQuery
+        .of(context)
+        .size
+        .height;
+    double w = MediaQuery
+        .of(context)
+        .size
+        .width;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Calculator', style: TextStyle(fontSize: 28.sp, color: Colors.black)),
+        title: Text('Calculator',
+            style: TextStyle(fontSize: 28.sp, color: Colors.black)),
       ),
       body: Column(
         children: [
@@ -63,7 +70,8 @@ class _HomePageState extends State<HomePage> {
               child: TextField(
                 controller: _controller,
                 showCursor: false,
-                readOnly: true, // Makes it uneditable by typing
+                readOnly: true,
+                // Makes it uneditable by typing
                 textAlign: TextAlign.right,
                 style: TextStyle(
                   fontSize: 55.sp,
@@ -134,7 +142,8 @@ class _HomePageState extends State<HomePage> {
                 ),
                 child: Text(
                   btnText,
-                  style: TextStyle(fontSize: 28.sp, fontWeight: FontWeight.bold),
+                  style: TextStyle(
+                      fontSize: 28.sp, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -142,57 +151,6 @@ class _HomePageState extends State<HomePage> {
         }).toList(),
       ),
     );
-  }
-
-  void btnClicked(String btnText) {
-    // Check if the input is an operator
-    bool isOperator = btnText == "+" || btnText == "-" || btnText == "*" || btnText == "/";
-
-    // If the button is an operator and the current text is empty, show an error
-    if (isOperator && text.isEmpty) {
-      return;
-    }
-
-    // If the button is "C", clear the text and expression
-    if (btnText == "C") {
-      text = "";
-      expression.clear();
-      setState(() {
-        _controller.text = text;
-      });
-    }
-    // If the button is "<", remove the last character
-    else if (btnText == "<") {
-      if (text.isNotEmpty) {
-        setState(() {
-          text = text.substring(0, text.length - 1); // Remove last character
-          _controller.text = text;
-          if (expression.isNotEmpty) {
-            expression.removeLast(); // Remove last entry from expression
-          }
-        });
-      }
-    }
-    // If the button is "=", calculate the result
-    else if (btnText == "=") {
-      calculateResult();
-    }
-    // For other buttons (numbers or operators)
-    else {
-      // If the last character is an operator, replace it with the new operator
-      if (isOperator && text.isNotEmpty && (text.endsWith("+") || text.endsWith("-") || text.endsWith("*") || text.endsWith("/"))) {
-        text = text.substring(0, text.length - 1) + btnText; // Replace last operator
-        expression[expression.length - 1] = btnText; // Update the expression
-      }
-      // If the last character is not an operator, add the new button text to the expression
-      else {
-        expression.add(btnText);
-        text += btnText; // Append button text to the displayed text
-      }
-      setState(() {
-        _controller.text = text; // Update the displayed text in the TextField
-      });
-    }
   }
 
   void calculateResult() {
@@ -206,41 +164,78 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         // Check if the result is infinite
         if (eval.isInfinite) {
-          setState(() {
-            text = "Error";
-            _controller.text = text;
-          });
-          Future.delayed(Duration(milliseconds: 200), () {
-            setState(() {
-              text = "";
-              _controller.text = text;
-            });
-          });
-          // Display "Error" for infinite values
-        }else {
+          text = "Error";
+          _controller.text = text;
+        } else {
           // Convert to string, then remove unnecessary trailing zeros and the decimal point if not needed
           text = eval.toStringAsFixed(15).replaceAll(
               RegExp(r'([.]*0+)(?!.*\d)'), '');
           if (text.endsWith('.')) {
-            text = text.substring(0,
-                text.length - 1); // Remove the decimal point if it's at the end
+            text = text.substring(
+                0, text.length - 1); // Remove trailing decimal point
           }
+          _controller.text = text;
+          expression = [text];
         }
-        _controller.text = text;
-        expression = [text];
       });
     } catch (e) {
       setState(() {
         text = "Error";
         _controller.text = text;
+        expression.clear();
       });
-      Future.delayed(Duration(milliseconds: 200), () {
-        setState(() {
-          text = "";
-          _controller.text = text;
-        });
-      });
+    }
+  }
+
+  void btnClicked(String btnText) {
+    // If an error is displayed, clear it before adding new input
+    if (text == "Error") {
+      text = "";
       expression.clear();
     }
+
+    bool isOperator = btnText == "+" || btnText == "-" || btnText == "*" ||
+        btnText == "/";
+
+    // If the button is an operator and the current text is empty, show an error
+    if (isOperator && text.isEmpty) {
+      return;
+    }
+
+    // If the button is "C", clear the text and expression
+    if (btnText == "C") {
+      text = "";
+      expression.clear();
+    }
+    // If the button is "<", remove the last character
+    else if (btnText == "<") {
+      if (text.isNotEmpty) {
+        text = text.substring(0, text.length - 1); // Remove last character
+        if (expression.isNotEmpty) {
+          expression.removeLast(); // Remove last entry from expression
+        }
+      }
+    }
+    // If the button is "=", calculate the result
+    else if (btnText == "=") {
+      calculateResult();
+    }
+    // For other buttons (numbers or operators)
+    else {
+      if (isOperator && text.isNotEmpty &&
+          (text.endsWith("+") || text.endsWith("-") || text.endsWith("*") ||
+              text.endsWith("/"))) {
+        text = text.substring(0, text.length - 1) +
+            btnText; // Replace last operator
+        expression[expression.length - 1] = btnText; // Update the expression
+      } else {
+        expression.add(btnText);
+        text += btnText; // Append button text to the displayed text
+      }
+    }
+
+    setState(() {
+      _controller.text = text; // Update the displayed text in the TextField
+    });
   }
 }
